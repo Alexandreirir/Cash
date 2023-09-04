@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cash Rush - A Corrida pelo Dinheiro</title>
+    <style>
+        /* Adicione estilos CSS aqui, se necessário */
+    </style>
+</head>
+<body>
+    <h1>Bem-vindo ao Cash Rush - A Corrida pelo Dinheiro!</h1>
+    <p>Corra para coletar dinheiro enquanto evita obstáculos.</p>
+
+    <!-- Crie uma div para exibir o jogo -->
+    <div id="game-container">
+        <!-- Aqui você pode exibir informações do jogo, como dinheiro e tempo restante -->
+        <p>Dinheiro: $<span id="money">0</span> | Distância percorrida: <span id="distance">0</span> metros</p>
+        <p>Tempo Restante: <span id="time">30:00</span></p>
+        <p>Posição Atual: <span id="position">N/A</span></p>
+
+        <!-- Adicione um botão para iniciar o jogo -->
+        <button id="start-button" onclick="iniciarJogo()">Iniciar Jogo</button>
+    </div>
+
+    <!-- Incorporar o JavaScript diretamente -->
+    <script>
+        // Variáveis iniciais
+        let dinheiro = 0;
+        let distancia = 0;
+        let moedasParaZerar = 1000;
+        let tempoRestante = 1800; // 30 minutos em segundos
+        const obstaculos = ["pedra", "barreira", "poça de lama"];
+        let ultimaMoedaTempo = 0;
+        let primeiraPosicaoZerada = null; // Variável para rastrear a primeira posição zerada
+        let posicaoAtual = 0;
+
+        // Função para atualizar o tempo na tela
+        function atualizarTempo() {
+            const minutos = Math.floor(tempoRestante / 60);
+            const segundos = tempoRestante % 60;
+            document.getElementById("time").textContent = `${minutos}:${segundos < 10 ? '0' : ''}${segundos}`;
+        }
+
+        // Função para gerar uma moeda a cada 15 segundos
+        function gerarMoeda() {
+            const agora = new Date().getTime() / 1000; // Tempo em segundos
+            if (agora - ultimaMoedaTempo >= 15) {
+                const quantia = Math.floor(Math.random() * 100) + 1;
+                dinheiro += quantia;
+                document.getElementById("money").textContent = dinheiro;
+                ultimaMoedaTempo = agora;
+            }
+        }
+
+        // Função principal do jogo
+        function iniciarJogo() {
+            posicaoAtual++; // Incrementa a posição atual do jogador
+            document.getElementById("position").textContent = posicaoAtual;
+
+            const interval = setInterval(() => {
+                if (dinheiro >= moedasParaZerar || tempoRestante <= 0) {
+                    clearInterval(interval);
+                    if (dinheiro >= moedasParaZerar) {
+                        if (primeiraPosicaoZerada === null) {
+                            primeiraPosicaoZerada = posicaoAtual;
+                            alert(`Parabéns! Você coletou $${dinheiro} e zerou o jogo na posição ${primeiraPosicaoZerada}!`);
+                        } else {
+                            alert(`Parabéns! Você coletou $${dinheiro} e zerou o jogo.`);
+                        }
+                    } else {
+                        alert("Tempo esgotado! Você não conseguiu coletar moedas suficientes.");
+                    }
+                } else {
+                    // Lógica do jogo aqui (coletar dinheiro, obstáculos, etc.)
+                    const evento = Math.random() < 0.5 ? "dinheiro" : "obstaculo";
+
+                    if (evento === "dinheiro") {
+                        const quantia = Math.floor(Math.random() * 100) + 1;
+                        dinheiro += quantia;
+                        document.getElementById("money").textContent = dinheiro;
+                    } else {
+                        const obstaculo = obstaculos[Math.floor(Math.random() * obstaculos.length)];
+                        distancia += 10;
+                        document.getElementById("distance").textContent = distancia;
+                        alert(`Cuidado! Encontrou uma ${obstaculo}.`);
+                        
+                        // Subtrair tempo de acordo com o tipo de obstáculo
+                        if (obstaculo === "poça de lama") {
+                            tempoRestante -= 60; // Subtrai 1 minuto
+                        } else if (obstaculo === "pedra") {
+                            tempoRestante -= 1; // Subtrai 1 segundo
+                        } else if (obstaculo === "barreira") {
+                            tempoRestante -= 180; // Subtrai 3 minutos
+                        }
+                    }
+
+                    // Chama a função para gerar moeda
+                    gerarMoeda();
+
+                    // Subtrair o tempo à medida que o jogo avança.
+                    tempoRestante--;
+                    atualizarTempo();
+                }
+            }, 1000); // Atualiza a cada segundo
+        }
+
+        // Adicionar um ouvinte de evento ao botão de iniciar
+        document.getElementById("start-button").addEventListener("click", iniciarJogo);
+    </script>
+</body>
+</html>
